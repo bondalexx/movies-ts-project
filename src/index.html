@@ -31,7 +31,7 @@
 								class="header-seacrh-input"
 								placeholder="Search Movie"
 							/>
-							<button onclick="onSearch()" class="search-btn">Search</button>
+							<button class="search-btn">Search</button>
 						</div>
 					</div>
 
@@ -55,16 +55,11 @@
 						<div class="filter-body-genre">
 							<p class="fiter-body-genre-sign">Genres</p>
 							<div class="filter-genre-body"></div>
-							<button onclick="onApplyFilter()" class="apply-genres-btn">
-								Apply
-							</button>
+							<button class="apply-genres-btn">Apply</button>
 						</div>
 
 						<div class="filter-select-body">
-							<select
-								onchange="onSelectMoviesType(event)"
-								class="select-movie-rates"
-							></select>
+							<select class="select-movie-rates"></select>
 						</div>
 					</div>
 				</div>
@@ -73,24 +68,14 @@
 						<div class="body-movie-content-wrapper"></div>
 
 						<div class="body-bottom-pagination">
-							<button
-								onclick="pageHanlder('previousPage', null)"
-								class="pagination"
-							>
-								&laquo;
-							</button>
+							<!-- <button class="pagination prev-page">&laquo;</button> -->
 							<div class="pagination-container"></div>
-							<button
-								onclick="pageHanlder('nextPage', null)"
-								class="pagination"
-							>
-								&raquo;
-							</button>
+							<!-- <button class="pagination next-page">&raquo;</button> -->
 						</div>
 					</div>
 					<div class="movie-details">
 						<div class="details-container"></div>
-						<button class="detail-back-button" onclick="onBack()">
+						<button class="detail-back-button">
 							<i class="fas fa-chevron-left"></i> Back
 						</button>
 					</div>
