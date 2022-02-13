@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Movies Project</title>
+	</head>
+	<body>
+		<div class="main-container">
+			<div class="upper-header-container">
+				<div class="header-logo-and-sign-container">
+					<div class="header-img-container">
+						<img
+							class="logo-img"
+							src="./assets/img/movie-city.png"
+							alt="logo"
+						/>
+					</div>
+				</div>
+
+				<div class="header-right-info-container">
+					<div class="header-title-and-search-container">
+						<div class="header-site-title">
+							<p class="site-title">Movie City</p>
+						</div>
+						<div class="header-seacrh-container">
+							<i class="fas fa-search"></i>
+							<input
+								type="text"
+								class="header-seacrh-input"
+								placeholder="Search Movie"
+							/>
+							<button onclick="onSearch()" class="search-btn">Search</button>
+						</div>
+					</div>
+
+					<div class="header-light-dark-mode-contianer">
+						<i class="fas fa-moon"></i>
+					</div>
+
+					<div class="header-profile-container">
+						<div class="header-img-and-user-name">
+							<img class="user-img" src="./assets/img/user-logo.jpg" />
+							<p class="user-name">Alex</p>
+							<p class="user-info">Info <i class="fas fa-sort-down"></i></p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="bottom-body-container">
+				<div class="body-filter-container">
+					<div class="body-filter">
+						<div class="filter-body-genre">
+							<p class="fiter-body-genre-sign">Genres</p>
+							<div class="filter-genre-body"></div>
+							<button onclick="onApplyFilter()" class="apply-genres-btn">
+								Apply
+							</button>
+						</div>
+
+						<div class="filter-select-body">
+							<select
+								onchange="onSelectMoviesType(event)"
+								class="select-movie-rates"
+							></select>
+						</div>
+					</div>
+				</div>
+				<div class="body-movie-content-container">
+					<div class="movie-content-list">
+						<div class="body-movie-content-wrapper"></div>
+
+						<div class="body-bottom-pagination">
+							<button
+								onclick="pageHanlder('previousPage', null)"
+								class="pagination"
+							>
+								&laquo;
+							</button>
+							<div class="pagination-container"></div>
+							<button
+								onclick="pageHanlder('nextPage', null)"
+								class="pagination"
+							>
+								&raquo;
+							</button>
+						</div>
+					</div>
+					<div class="movie-details">
+						<div class="details-container"></div>
+						<button class="detail-back-button" onclick="onBack()">
+							<i class="fas fa-chevron-left"></i> Back
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
