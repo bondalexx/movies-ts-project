@@ -179,7 +179,6 @@ const renderMovie = (movies: any) => {
 	movieWrapper.innerHTML = '';
 
 	movies.forEach((movie: any) => {
-		// NEW !!!
 		movieWrapper.innerHTML += `<div data-movie-id="${movie.movieId}" class="movie-card">
 			<img src="${movie.image}" class="movie-logo-img" />
 			<div class="movie-details-info">
@@ -190,7 +189,6 @@ const renderMovie = (movies: any) => {
 		</div>`;
 	});
 
-	// NEW !!!
 	document.querySelectorAll('.movie-card').forEach(mc => {
 		mc.addEventListener('click', onMovieClick, false);
 	});
@@ -237,7 +235,6 @@ const renderGenres = () => {
 	</div>`;
 	});
 
-	// NEW !!!
 	document.querySelectorAll('.filtered-checkboxes').forEach(fc => {
 		fc.addEventListener('click', onChooseGenre, false);
 	});
@@ -289,7 +286,6 @@ const renderPages = (totalPages: any, action: any) => {
 		paginationContainer.innerHTML += markup;
 	}
 
-	// NEW !!!
 	document.querySelectorAll('.pagination').forEach(p => {
 		p.addEventListener(
 			'click',
@@ -305,7 +301,6 @@ renderMoviesTypes();
 getGenres();
 getMoviesOnCondition('top_rated', currentPage, 'getMovies');
 
-// NEW !!!
 searchBtn.addEventListener('click', onSearch, false);
 selectMoviesType.addEventListener('change', onSelectMoviesType, false);
 applyFilterBtn.addEventListener('click', onApplyFilter, false);
