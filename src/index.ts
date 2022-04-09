@@ -1,53 +1,70 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import './styles.scss';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
-const movieWrapper: any = document.querySelector('.body-movie-content-wrapper');
-const paginationContainer: any = document.querySelector(
+import './styles.scss';
+
+import { Genre } from './models/genres.interfarce';
+import { MoviesType } from './models/movies.interface';
+
+const movieWrapper: HTMLDivElement = document.querySelector(
+	'.body-movie-content-wrapper'
+);
+const paginationContainer: HTMLDivElement = document.querySelector(
 	'.pagination-container'
 );
-const searchInput: any = document.querySelector('.header-seacrh-input');
-const movieContentList: any = document.querySelector('.movie-content-list');
-const movieDetails: any = document.querySelector('.movie-details');
-const detailsContainer: any = document.querySelector('.details-container');
-const selectMoviesTypeContainer: any = document.querySelector(
+const searchInput: HTMLInputElement = document.querySelector(
+	'.header-seacrh-input'
+);
+const movieContentList: HTMLDivElement = document.querySelector(
+	'.movie-content-list'
+);
+const movieDetails: HTMLDivElement = document.querySelector('.movie-details');
+const detailsContainer: HTMLDivElement =
+	document.querySelector('.details-container');
+const selectMoviesTypeContainer: HTMLSelectElement = document.querySelector(
 	'.select-movie-rates'
 );
-const filterGenreBody: any = document.querySelector('.filter-genre-body');
-const searchBtn = document.querySelector('.search-btn');
-const selectMoviesType = document.querySelector('.select-movie-rates');
-const applyFilterBtn = document.querySelector('.apply-genres-btn');
-const detailBackBtn = document.querySelector('.detail-back-button');
+const filterGenreBody: HTMLDivElement =
+	document.querySelector('.filter-genre-body');
+const searchBtn: HTMLButtonElement = document.querySelector('.search-btn');
+const selectMoviesType: HTMLSelectElement = document.querySelector(
+	'.select-movie-rates'
+);
+const applyFilterBtn: HTMLButtonElement =
+	document.querySelector('.apply-genres-btn');
+const detailBackBtn: HTMLButtonElement = document.querySelector(
+	'.detail-back-button'
+);
 
 const API_URL = 'https://api.themoviedb.org/3';
 const API_KEY = 'e1036725d4b220e51c48c798d13bcf37';
 const IMAGE_BASE_URL = 'http://image.tmdb.org/t/p/w500';
 
 let currentPage = 1;
-let genres: any = [];
-let paginationNumberArr: any = [];
+let genres: Genre[];
+let paginationNumberArr: number[] = [];
 let pageIndex = 0;
 let currentRequestType = 'top_rated';
 
-const pages: any = [];
-const moviesType = [
+const pages: number[] = [];
+const moviesType: MoviesType[] = [
 	{ value: 'top_rated', title: 'Top Rated' },
 	{ value: 'popular', title: 'Popular' },
 	{ value: 'upcoming', title: 'Upcoming' },
 ];
-const genresToSend: any = [];
+const genresToSend: number[] = [];
 
 const getMoviesOnCondition = async (
-	requestType: any,
-	page: any,
-	action: any
-) => {
+	requestType: string,
+	page: number,
+	action: string
+): Promise<void> => {
 	let url = '';
 
 	currentRequestType = requestType;
 
-	const isRequestTypeIncluded = moviesType.some(
+	const isRequestTypeIncluded: boolean = moviesType.some(
 		movieType => movieType.value === requestType
 	);
 
@@ -62,11 +79,11 @@ const getMoviesOnCondition = async (
 	}
 
 	try {
-		const moviesData = await axios.get(url);
+		const moviesData: AxiosResponse = await axios.get(url);
 
 		const movies = moviesData.data.results.map((movie: any) => {
-			const genresName = movie.genre_ids.map((genreId: any) => {
-				return genres.filter((genre: any) => genre.id === genreId)[0].name;
+			const genresName = movie.genre_ids.map((genreId: number) => {
+				return genres.filter((genre: Genre) => genre.id === genreId)[0].name;
 			});
 
 			return {
