@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosResponse } from 'axios';
 
 import './styles.scss';
 
 import { Genre } from './models/genres.interfarce';
-import { MoviesType } from './models/movies.interface';
+import { Movie, MoviesType } from './models/movies.interface';
 
 const movieWrapper: HTMLDivElement = document.querySelector(
 	'.body-movie-content-wrapper'
@@ -81,8 +79,8 @@ const getMoviesOnCondition = async (
 	try {
 		const moviesData: AxiosResponse = await axios.get(url);
 
-		const movies = moviesData.data.results.map((movie: any) => {
-			const genresName = movie.genre_ids.map((genreId: number) => {
+		const movies: Movie[] = moviesData.data.results.map((movie: Movie) => {
+			const genresName: string[] = movie.genre_ids.map((genreId: number) => {
 				return genres.filter((genre: Genre) => genre.id === genreId)[0].name;
 			});
 
@@ -100,32 +98,32 @@ const getMoviesOnCondition = async (
 	} catch (err) {}
 };
 
-const getMovieById = async (movieId: any) => {
+const getMovieById = async (movieId: number): Promise<void> => {
 	try {
-		const movieByIdData = await axios.get(
+		const movieByIdData: AxiosResponse = await axios.get(
 			`${API_URL}/movie/${movieId}?api_key=${API_KEY}`
 		);
 
-		const genresName = movieByIdData.data.genres.map(
-			(genre: any) => genre.name
+		const genresName: string[] = movieByIdData.data.genres.map(
+			(genre: Genre) => genre.name
 		);
 
-		const movieObjById = {
+		const movieObjById: Movie = {
 			image: IMAGE_BASE_URL + movieByIdData.data.poster_path,
 			title: movieByIdData.data.title,
 			year: movieByIdData.data.release_date,
 			genre: genresName,
 			overview: movieByIdData.data.overview,
-			voteAverage: movieByIdData.data.vote_average,
+			vote_average: movieByIdData.data.vote_average,
 		};
 
 		renderDetailsPage(movieObjById);
 	} catch (err) {}
 };
 
-const getGenres = async () => {
+const getGenres = async (): Promise<void> => {
 	try {
-		const genresData = await axios.get(
+		const genresData: AxiosResponse = await axios.get(
 			`${API_URL}/genre/movie/list?api_key=${API_KEY}`
 		);
 		genres = genresData.data.genres;
@@ -134,8 +132,10 @@ const getGenres = async () => {
 	} catch (err) {}
 };
 
-const pageHanlder = (action: any, event: any) => {
-	const page = parseInt(event.target.getAttribute('data-page-i'));
+const pageHanlder = (action: string, event: PointerEvent): void => {
+	const page: number = parseInt(
+		(event.target as Element).getAttribute('data-page-i')
+	);
 
 	if (action === 'pageClick') {
 		currentPage = page;
@@ -144,40 +144,45 @@ const pageHanlder = (action: any, event: any) => {
 	getMoviesOnCondition(currentRequestType, currentPage, action);
 };
 
-const onMovieClick = (event: any) => {
+const onMovieClick = (event: PointerEvent): void => {
 	movieContentList.style.display = 'none';
 	movieDetails.style.display = 'flex';
 
-	const movieId = event.target.parentElement.getAttribute('data-movie-id');
+	const movieId: number = parseInt(
+		(event.target as Element).parentElement.getAttribute('data-movie-id')
+	);
 
 	getMovieById(movieId);
 };
 
-const onBack = () => {
+const onBack = (): void => {
 	movieDetails.style.display = 'none';
 	movieContentList.style.display = 'flex';
 };
 
-const onSearch = () => {
+const onSearch = (): void => {
 	currentPage = 1;
 	getMoviesOnCondition('search', currentPage, 'searchMovie');
 };
 
-const onSelectMoviesType = async (event: any) => {
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+const onSelectMoviesType = async (event: any): Promise<void> => {
 	currentPage = 1;
 	getMoviesOnCondition(event.target.value, currentPage, 'selectMoviesType');
 };
 
-const onChooseGenre = (event: any) => {
-	const genreId = event.target.getAttribute('data-genre-id');
+const onChooseGenre = (event: PointerEvent): void => {
+	const genreId: number = parseInt(
+		(event.target as Element).getAttribute('data-genre-id')
+	);
 
 	if (genresToSend.length === 0) {
 		genresToSend.push(genreId);
 	} else {
-		const isGenresIdIncluded = genresToSend.some(
-			(genre: any) => genre === genreId
+		const isGenresIdIncluded: boolean = genresToSend.some(
+			(genre: number) => genre === genreId
 		);
-		const genreIndex = genresToSend.indexOf(genreId);
+		const genreIndex: number = genresToSend.indexOf(genreId);
 
 		if (isGenresIdIncluded) {
 			genresToSend.splice(genreIndex, 1);
@@ -187,15 +192,15 @@ const onChooseGenre = (event: any) => {
 	}
 };
 
-const onApplyFilter = () => {
+const onApplyFilter = (): void => {
 	currentPage = 1;
 	getMoviesOnCondition('genresFiltered', currentPage, 'applyGenresFilter');
 };
 
-const renderMovie = (movies: any) => {
+const renderMovie = (movies: Movie[]): void => {
 	movieWrapper.innerHTML = '';
 
-	movies.forEach((movie: any) => {
+	movies.forEach((movie: Movie) => {
 		movieWrapper.innerHTML += `<div data-movie-id="${movie.movieId}" class="movie-card">
 			<img src="${movie.image}" class="movie-logo-img" />
 			<div class="movie-details-info">
@@ -206,12 +211,12 @@ const renderMovie = (movies: any) => {
 		</div>`;
 	});
 
-	document.querySelectorAll('.movie-card').forEach(mc => {
+	document.querySelectorAll('.movie-card').forEach((mc: HTMLDivElement) => {
 		mc.addEventListener('click', onMovieClick, false);
 	});
 };
 
-const renderDetailsPage = (movieById: any) => {
+const renderDetailsPage = (movieById: Movie): void => {
 	detailsContainer.innerHTML = '';
 
 	detailsContainer.innerHTML += `	<div class="movie-vote-average-container">
@@ -221,7 +226,7 @@ const renderDetailsPage = (movieById: any) => {
     />
     <div class="vote-average-container">
     <p class="vote-average-header">Vote Average:</p>
-      <p class="vote-average-sign">${movieById.voteAverage}</p>
+      <p class="vote-average-sign">${movieById.vote_average}</p>
     </div>
   </div>
   <div class="movie-details-sign-container">
@@ -244,28 +249,30 @@ const renderDetailsPage = (movieById: any) => {
   </div>`;
 };
 
-const renderGenres = () => {
-	genres.forEach((genre: any) => {
+const renderGenres = (): void => {
+	genres.forEach((genre: Genre) => {
 		filterGenreBody.innerHTML += `<div class="body-filter-body">	
 		<input type="checkbox" data-genre-id="${genre.id}" class="filtered-checkboxes" />
 		<p class="body-filter-movie-type">${genre.name}</p>
 	</div>`;
 	});
 
-	document.querySelectorAll('.filtered-checkboxes').forEach(fc => {
-		fc.addEventListener('click', onChooseGenre, false);
-	});
+	document
+		.querySelectorAll('.filtered-checkboxes')
+		.forEach((fc: HTMLInputElement) => {
+			fc.addEventListener('click', onChooseGenre, false);
+		});
 };
 
-const renderMoviesTypes = () => {
-	moviesType.forEach(movieType => {
+const renderMoviesTypes = (): void => {
+	moviesType.forEach((movieType: MoviesType) => {
 		selectMoviesTypeContainer.innerHTML += `<option class="filter-optoin" value="${movieType.value}">
 		${movieType.title}
 	</option>`;
 	});
 };
 
-const renderPages = (totalPages: any, action: any) => {
+const renderPages = (totalPages: number, action: string): void => {
 	paginationContainer.innerHTML = '';
 
 	for (let i = 1; i <= totalPages; i++) {
@@ -300,13 +307,14 @@ const renderPages = (totalPages: any, action: any) => {
 		}" class="pagination ${
 			currentPage === paginationNumberArr[i] ? 'active' : ''
 		}">${paginationNumberArr[i]}</button>`;
+
 		paginationContainer.innerHTML += markup;
 	}
 
-	document.querySelectorAll('.pagination').forEach(p => {
+	document.querySelectorAll('.pagination').forEach((p: HTMLButtonElement) => {
 		p.addEventListener(
 			'click',
-			(event: any) => {
+			(event: PointerEvent) => {
 				pageHanlder('pageClick', event);
 			},
 			false
