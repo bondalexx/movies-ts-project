@@ -4,6 +4,7 @@ import './styles.scss';
 
 import { Genre } from './models/genres.interfarce';
 import { Movie, MoviesType } from './models/movies.interface';
+import Renderer from './components/Renderer';
 
 const movieWrapper: HTMLDivElement = document.querySelector(
 	'.body-movie-content-wrapper'
@@ -53,6 +54,47 @@ const moviesType: MoviesType[] = [
 ];
 const genresToSend: number[] = [];
 
+const onMovieClick = (event: PointerEvent): void => {
+	movieContentList.style.display = 'none';
+	movieDetails.style.display = 'flex';
+
+	const movieId: number = parseInt(
+		(event.target as Element).parentElement.getAttribute('data-movie-id')
+	);
+
+	getMovieById(movieId);
+};
+
+const onChooseGenre = (event: PointerEvent): void => {
+	const genreId: number = parseInt(
+		(event.target as Element).getAttribute('data-genre-id')
+	);
+
+	if (genresToSend.length === 0) {
+		genresToSend.push(genreId);
+	} else {
+		const isGenresIdIncluded: boolean = genresToSend.some(
+			(genre: number) => genre === genreId
+		);
+		const genreIndex: number = genresToSend.indexOf(genreId);
+
+		if (isGenresIdIncluded) {
+			genresToSend.splice(genreIndex, 1);
+		} else {
+			genresToSend.push(genreId);
+		}
+	}
+};
+
+const renderer = new Renderer(
+	movieWrapper,
+	detailsContainer,
+	filterGenreBody,
+	selectMoviesTypeContainer,
+	onMovieClick,
+	onChooseGenre
+);
+
 const getMoviesOnCondition = async (
 	requestType: string,
 	page: number,
@@ -94,7 +136,7 @@ const getMoviesOnCondition = async (
 		});
 
 		renderPages(moviesData.data.total_pages, action);
-		renderMovie(movies);
+		renderer.renderMovie(movies);
 	} catch (err) {}
 };
 
@@ -117,7 +159,7 @@ const getMovieById = async (movieId: number): Promise<void> => {
 			vote_average: movieByIdData.data.vote_average,
 		};
 
-		renderDetailsPage(movieObjById);
+		renderer.renderDetailsPage(movieObjById);
 	} catch (err) {}
 };
 
@@ -128,7 +170,7 @@ const getGenres = async (): Promise<void> => {
 		);
 		genres = genresData.data.genres;
 
-		renderGenres();
+		renderer.renderGenres(genres);
 	} catch (err) {}
 };
 
@@ -142,17 +184,6 @@ const pageHanlder = (action: string, event: PointerEvent): void => {
 	}
 
 	getMoviesOnCondition(currentRequestType, currentPage, action);
-};
-
-const onMovieClick = (event: PointerEvent): void => {
-	movieContentList.style.display = 'none';
-	movieDetails.style.display = 'flex';
-
-	const movieId: number = parseInt(
-		(event.target as Element).parentElement.getAttribute('data-movie-id')
-	);
-
-	getMovieById(movieId);
 };
 
 const onBack = (): void => {
@@ -171,105 +202,9 @@ const onSelectMoviesType = async (event: any): Promise<void> => {
 	getMoviesOnCondition(event.target.value, currentPage, 'selectMoviesType');
 };
 
-const onChooseGenre = (event: PointerEvent): void => {
-	const genreId: number = parseInt(
-		(event.target as Element).getAttribute('data-genre-id')
-	);
-
-	if (genresToSend.length === 0) {
-		genresToSend.push(genreId);
-	} else {
-		const isGenresIdIncluded: boolean = genresToSend.some(
-			(genre: number) => genre === genreId
-		);
-		const genreIndex: number = genresToSend.indexOf(genreId);
-
-		if (isGenresIdIncluded) {
-			genresToSend.splice(genreIndex, 1);
-		} else {
-			genresToSend.push(genreId);
-		}
-	}
-};
-
 const onApplyFilter = (): void => {
 	currentPage = 1;
 	getMoviesOnCondition('genresFiltered', currentPage, 'applyGenresFilter');
-};
-
-const renderMovie = (movies: Movie[]): void => {
-	movieWrapper.innerHTML = '';
-
-	movies.forEach((movie: Movie) => {
-		movieWrapper.innerHTML += `<div data-movie-id="${movie.movieId}" class="movie-card">
-			<img src="${movie.image}" class="movie-logo-img" />
-			<div class="movie-details-info">
-					<p class="movie-title">${movie.title}</p>
-					<p class="movie-year">${movie.year}</p>
-					<p class="movie-genre">${movie.genre}</p>
-			</div>
-		</div>`;
-	});
-
-	document.querySelectorAll('.movie-card').forEach((mc: HTMLDivElement) => {
-		mc.addEventListener('click', onMovieClick, false);
-	});
-};
-
-const renderDetailsPage = (movieById: Movie): void => {
-	detailsContainer.innerHTML = '';
-
-	detailsContainer.innerHTML += `	<div class="movie-vote-average-container">
-    <img
-      class="movie-img"
-      src="${movieById.image}"
-    />
-    <div class="vote-average-container">
-    <p class="vote-average-header">Vote Average:</p>
-      <p class="vote-average-sign">${movieById.vote_average}</p>
-    </div>
-  </div>
-  <div class="movie-details-sign-container">
-    <div class="title-details">
-      <p class="movie-details-sign">Title:</p>
-      <p class="detail-info-sign detail-title">${movieById.title}</p>
-    </div>
-    <div>
-      <p class="movie-details-sign">Year:</p>
-      <p class="detail-info-sign">${movieById.year}</p>
-    </div>
-    <div>
-      <p class="movie-details-sign">Genre:</p>
-      <p class="detail-info-sign">${movieById.genre}</p>
-    </div>
-    <div>
-      <p class="movie-details-sign">Overview:</p>
-      <p class="detail-overview">${movieById.overview}</p>
-    </div>
-  </div>`;
-};
-
-const renderGenres = (): void => {
-	genres.forEach((genre: Genre) => {
-		filterGenreBody.innerHTML += `<div class="body-filter-body">	
-		<input type="checkbox" data-genre-id="${genre.id}" class="filtered-checkboxes" />
-		<p class="body-filter-movie-type">${genre.name}</p>
-	</div>`;
-	});
-
-	document
-		.querySelectorAll('.filtered-checkboxes')
-		.forEach((fc: HTMLInputElement) => {
-			fc.addEventListener('click', onChooseGenre, false);
-		});
-};
-
-const renderMoviesTypes = (): void => {
-	moviesType.forEach((movieType: MoviesType) => {
-		selectMoviesTypeContainer.innerHTML += `<option class="filter-optoin" value="${movieType.value}">
-		${movieType.title}
-	</option>`;
-	});
 };
 
 const renderPages = (totalPages: number, action: string): void => {
@@ -322,7 +257,7 @@ const renderPages = (totalPages: number, action: string): void => {
 	});
 };
 
-renderMoviesTypes();
+renderer.renderMoviesTypes(moviesType);
 getGenres();
 getMoviesOnCondition('top_rated', currentPage, 'getMovies');
 
