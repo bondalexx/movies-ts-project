@@ -1,10 +1,11 @@
-import axios, { AxiosResponse } from 'axios';
-
 import './styles.scss';
 
 import { Genre } from './models/genres.interfarce';
 import { Movie, MoviesType } from './models/movies.interface';
 import Renderer from './components/Renderer';
+import Pagination from './components/Pagination';
+import MovieService from './components/MovieService';
+import { API_CONFIG } from './environment/api';
 
 const movieWrapper: HTMLDivElement = document.querySelector(
 	'.body-movie-content-wrapper'
@@ -36,17 +37,9 @@ const detailBackBtn: HTMLButtonElement = document.querySelector(
 	'.detail-back-button'
 );
 
-const API_URL = 'https://api.themoviedb.org/3';
-const API_KEY = 'e1036725d4b220e51c48c798d13bcf37';
-const IMAGE_BASE_URL = 'http://image.tmdb.org/t/p/w500';
-
-let currentPage = 1;
 let genres: Genre[];
-let paginationNumberArr: number[] = [];
-let pageIndex = 0;
 let currentRequestType = 'top_rated';
 
-const pages: number[] = [];
 const moviesType: MoviesType[] = [
 	{ value: 'top_rated', title: 'Top Rated' },
 	{ value: 'popular', title: 'Popular' },
@@ -86,15 +79,6 @@ const onChooseGenre = (event: PointerEvent): void => {
 	}
 };
 
-const renderer = new Renderer(
-	movieWrapper,
-	detailsContainer,
-	filterGenreBody,
-	selectMoviesTypeContainer,
-	onMovieClick,
-	onChooseGenre
-);
-
 const getMoviesOnCondition = async (
 	requestType: string,
 	page: number,
@@ -109,17 +93,17 @@ const getMoviesOnCondition = async (
 	);
 
 	if (isRequestTypeIncluded) {
-		url = `${API_URL}/movie/${requestType}?api_key=${API_KEY}&page=${page}`;
+		url = `${API_CONFIG.apiUrl}/movie/${requestType}?api_key=${API_CONFIG.apiKey}&page=${page}`;
 	} else if (requestType === 'search' && !searchInput.value) {
-		url = `${API_URL}/movie/top_rated?api_key=${API_KEY}&page=${page}`;
+		url = `${API_CONFIG.apiUrl}/movie/top_rated?api_key=${API_CONFIG.apiKey}&page=${page}`;
 	} else if (requestType === 'genresFiltered') {
-		url = `${API_URL}/discover/movie?api_key=${API_KEY}&page=${page}&with_genres=${genresToSend}`;
+		url = `${API_CONFIG.apiUrl}/discover/movie?api_key=${API_CONFIG.apiKey}&page=${page}&with_genres=${genresToSend}`;
 	} else {
-		url = `${API_URL}/search/movie?api_key=${API_KEY}&query=${searchInput.value}&page=${page}`;
+		url = `${API_CONFIG.apiUrl}/search/movie?api_key=${API_CONFIG.apiKey}&query=${searchInput.value}&page=${page}`;
 	}
 
 	try {
-		const moviesData: AxiosResponse = await axios.get(url);
+		const moviesData = await movieService.getRequest(url);
 
 		const movies: Movie[] = moviesData.data.results.map((movie: Movie) => {
 			const genresName: string[] = movie.genre_ids.map((genreId: number) => {
@@ -127,7 +111,7 @@ const getMoviesOnCondition = async (
 			});
 
 			return {
-				image: IMAGE_BASE_URL + movie.poster_path,
+				image: API_CONFIG.imageBaseUrl + movie.poster_path,
 				title: movie.title,
 				year: movie.release_date,
 				genre: genresName,
@@ -135,23 +119,24 @@ const getMoviesOnCondition = async (
 			};
 		});
 
-		renderPages(moviesData.data.total_pages, action);
+		pagination.renderPages(
+			moviesData.data.total_pages,
+			action,
+			currentRequestType
+		);
 		renderer.renderMovie(movies);
 	} catch (err) {}
 };
 
 const getMovieById = async (movieId: number): Promise<void> => {
 	try {
-		const movieByIdData: AxiosResponse = await axios.get(
-			`${API_URL}/movie/${movieId}?api_key=${API_KEY}`
-		);
-
+		const url = `${API_CONFIG.apiUrl}/movie/${movieId}?api_key=${API_CONFIG.apiKey}`;
+		const movieByIdData = await movieService.getRequest(url);
 		const genresName: string[] = movieByIdData.data.genres.map(
 			(genre: Genre) => genre.name
 		);
-
 		const movieObjById: Movie = {
-			image: IMAGE_BASE_URL + movieByIdData.data.poster_path,
+			image: API_CONFIG.imageBaseUrl + movieByIdData.data.poster_path,
 			title: movieByIdData.data.title,
 			year: movieByIdData.data.release_date,
 			genre: genresName,
@@ -165,25 +150,12 @@ const getMovieById = async (movieId: number): Promise<void> => {
 
 const getGenres = async (): Promise<void> => {
 	try {
-		const genresData: AxiosResponse = await axios.get(
-			`${API_URL}/genre/movie/list?api_key=${API_KEY}`
-		);
-		genres = genresData.data.genres;
+		const url = `${API_CONFIG.apiUrl}/genre/movie/list?api_key=${API_CONFIG.apiKey}`;
+		const genresResponse = await movieService.getRequest(url);
+		genres = genresResponse.data.genres;
 
 		renderer.renderGenres(genres);
 	} catch (err) {}
-};
-
-const pageHanlder = (action: string, event: PointerEvent): void => {
-	const page: number = parseInt(
-		(event.target as Element).getAttribute('data-page-i')
-	);
-
-	if (action === 'pageClick') {
-		currentPage = page;
-	}
-
-	getMoviesOnCondition(currentRequestType, currentPage, action);
 };
 
 const onBack = (): void => {
@@ -192,74 +164,43 @@ const onBack = (): void => {
 };
 
 const onSearch = (): void => {
-	currentPage = 1;
-	getMoviesOnCondition('search', currentPage, 'searchMovie');
+	pagination.currentPage = 1;
+	getMoviesOnCondition('search', pagination.currentPage, 'searchMovie');
 };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const onSelectMoviesType = async (event: any): Promise<void> => {
-	currentPage = 1;
-	getMoviesOnCondition(event.target.value, currentPage, 'selectMoviesType');
+	pagination.currentPage = 1;
+	getMoviesOnCondition(
+		event.target.value,
+		pagination.currentPage,
+		'selectMoviesType'
+	);
 };
 
 const onApplyFilter = (): void => {
-	currentPage = 1;
-	getMoviesOnCondition('genresFiltered', currentPage, 'applyGenresFilter');
+	pagination.currentPage = 1;
+	getMoviesOnCondition(
+		'genresFiltered',
+		pagination.currentPage,
+		'applyGenresFilter'
+	);
 };
 
-const renderPages = (totalPages: number, action: string): void => {
-	paginationContainer.innerHTML = '';
-
-	for (let i = 1; i <= totalPages; i++) {
-		pages.push(i);
-	}
-
-	if (action === 'searchMovie' || action === 'selectMoviesType') {
-		pageIndex = 0;
-	}
-
-	if (currentPage === paginationNumberArr[paginationNumberArr.length - 1]) {
-		pageIndex = currentPage - 1;
-	}
-
-	if (
-		paginationNumberArr[0] === currentPage &&
-		currentPage !== 1 &&
-		action === 'pageClick'
-	) {
-		if (currentPage === 4) {
-			pageIndex = 0;
-		} else {
-			pageIndex = currentPage - 5;
-		}
-	}
-
-	paginationNumberArr = pages.slice(pageIndex, pageIndex + 5);
-
-	for (let i = 0; i < paginationNumberArr.length; i++) {
-		const markup = `<button data-page-i="${
-			paginationNumberArr[i]
-		}" class="pagination ${
-			currentPage === paginationNumberArr[i] ? 'active' : ''
-		}">${paginationNumberArr[i]}</button>`;
-
-		paginationContainer.innerHTML += markup;
-	}
-
-	document.querySelectorAll('.pagination').forEach((p: HTMLButtonElement) => {
-		p.addEventListener(
-			'click',
-			(event: PointerEvent) => {
-				pageHanlder('pageClick', event);
-			},
-			false
-		);
-	});
-};
+const pagination = new Pagination(paginationContainer, getMoviesOnCondition);
+const movieService = new MovieService();
+const renderer = new Renderer(
+	movieWrapper,
+	detailsContainer,
+	filterGenreBody,
+	selectMoviesTypeContainer,
+	onMovieClick,
+	onChooseGenre
+);
 
 renderer.renderMoviesTypes(moviesType);
 getGenres();
-getMoviesOnCondition('top_rated', currentPage, 'getMovies');
+getMoviesOnCondition('top_rated', pagination.currentPage, 'getMovies');
 
 searchBtn.addEventListener('click', onSearch, false);
 selectMoviesType.addEventListener('change', onSelectMoviesType, false);
