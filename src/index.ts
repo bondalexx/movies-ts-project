@@ -1,11 +1,10 @@
 import './styles.scss';
 
-import { Genre } from './models/genres.interfarce';
 import { MoviesType } from './models/movies.interface';
 import Renderer from './components/Renderer';
 import Pagination from './components/Pagination';
 import MovieService from './components/MovieService';
-import GetMovie from './components/GetMovies';
+import MoviesHandler from './components/MoviesHandler';
 
 const movieWrapper: HTMLDivElement = document.querySelector(
 	'.body-movie-content-wrapper'
@@ -37,8 +36,6 @@ const detailBackBtn: HTMLButtonElement = document.querySelector(
 	'.detail-back-button'
 );
 
-let genres: Genre[];
-
 export const moviesType: MoviesType[] = [
 	{ value: 'top_rated', title: 'Top Rated' },
 	{ value: 'popular', title: 'Popular' },
@@ -53,7 +50,7 @@ const onMovieClick = (event: PointerEvent): void => {
 		(event.target as Element).parentElement.getAttribute('data-movie-id')
 	);
 
-	getMovie.getMovieById(movieId);
+	moviesHandler.getMovieById(movieId);
 };
 
 const onChooseGenre = (event: PointerEvent): void => {
@@ -61,18 +58,18 @@ const onChooseGenre = (event: PointerEvent): void => {
 		(event.target as Element).getAttribute('data-genre-id')
 	);
 
-	if (getMovie.genresToSend.length === 0) {
-		getMovie.genresToSend.push(genreId);
+	if (moviesHandler.genresToSend.length === 0) {
+		moviesHandler.genresToSend.push(genreId);
 	} else {
-		const isGenresIdIncluded: boolean = getMovie.genresToSend.some(
+		const isGenresIdIncluded: boolean = moviesHandler.genresToSend.some(
 			(genre: number) => genre === genreId
 		);
-		const genreIndex: number = getMovie.genresToSend.indexOf(genreId);
+		const genreIndex: number = moviesHandler.genresToSend.indexOf(genreId);
 
 		if (isGenresIdIncluded) {
-			getMovie.genresToSend.splice(genreIndex, 1);
+			moviesHandler.genresToSend.splice(genreIndex, 1);
 		} else {
-			getMovie.genresToSend.push(genreId);
+			moviesHandler.genresToSend.push(genreId);
 		}
 	}
 };
@@ -84,7 +81,7 @@ const onBack = (): void => {
 
 const onSearch = (): void => {
 	pagination.currentPage = 1;
-	getMovie.getMoviesOnCondition(
+	moviesHandler.getMoviesOnCondition(
 		'search',
 		pagination.currentPage,
 		'searchMovie'
@@ -94,7 +91,7 @@ const onSearch = (): void => {
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const onSelectMoviesType = async (event: any): Promise<void> => {
 	pagination.currentPage = 1;
-	getMovie.getMoviesOnCondition(
+	moviesHandler.getMoviesOnCondition(
 		event.target.value,
 		pagination.currentPage,
 		'selectMoviesType'
@@ -103,17 +100,17 @@ const onSelectMoviesType = async (event: any): Promise<void> => {
 
 const onApplyFilter = (): void => {
 	pagination.currentPage = 1;
-	getMovie.getMoviesOnCondition(
+	moviesHandler.getMoviesOnCondition(
 		'genresFiltered',
 		pagination.currentPage,
 		'applyGenresFilter'
 	);
 };
 
-const getMovie = new GetMovie(searchInput, genres);
+const moviesHandler = new MoviesHandler(searchInput);
 export const pagination = new Pagination(
 	paginationContainer,
-	getMovie.getMoviesOnCondition
+	moviesHandler.getMoviesOnCondition
 );
 export const movieService = new MovieService();
 export const renderer = new Renderer(
@@ -126,8 +123,12 @@ export const renderer = new Renderer(
 );
 
 renderer.renderMoviesTypes(moviesType);
-getMovie.getGenres();
-getMovie.getMoviesOnCondition('top_rated', pagination.currentPage, 'getMovies');
+moviesHandler.getGenres();
+moviesHandler.getMoviesOnCondition(
+	'top_rated',
+	pagination.currentPage,
+	'getMovies'
+);
 
 searchBtn.addEventListener('click', onSearch, false);
 selectMoviesType.addEventListener('change', onSelectMoviesType, false);
