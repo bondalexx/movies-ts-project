@@ -117,12 +117,7 @@ const renderer = new Renderer(
 );
 
 renderer.renderMoviesTypes(moviesType);
-moviesHandler.getGenres();
-moviesHandler.getMoviesOnCondition(
-	'top_rated',
-	pagination.currentPage,
-	'getMovies'
-);
+moviesHandler.getGenres('top_rated', pagination.currentPage, 'getMovies');
 
 searchBtn.addEventListener('click', onSearch, false);
 selectMoviesType.addEventListener('change', onSelectMoviesType, false);

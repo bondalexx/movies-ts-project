@@ -21,7 +21,7 @@ class MoviesHandler {
 	public _genresToSend: number[] = [];
 
 	private currentRequestType = 'top_rated';
-	private genres: Genre[] = [];
+	private _genres: Genre[] = [];
 	private movieService: MovieService = new MovieService();
 	private renderer: Renderer = new Renderer(
 		movieWrapper,
@@ -38,6 +38,14 @@ class MoviesHandler {
 
 	public set genresToSend(v: number[]) {
 		this._genresToSend = v;
+	}
+
+	public get genres(): Genre[] {
+		return this._genres;
+	}
+
+	public set genres(v: Genre[]) {
+		this._genres = v;
 	}
 
 	public async getMoviesOnCondition(
@@ -62,30 +70,30 @@ class MoviesHandler {
 			url = `${API_CONFIG.apiUrl}/search/movie?api_key=${API_CONFIG.apiKey}&query=${searchInput.value}&page=${page}`;
 		}
 
-		// try {
-		const moviesData: AxiosResponse = await this.movieService.getRequest(url);
+		try {
+			const moviesData: AxiosResponse = await this.movieService.getRequest(url);
 
-		const movies = moviesData.data.results.map((movie: Movie) => {
-			const genresName: string[] = movie.genre_ids.map((genreId: number) => {
-				return this.genres.filter(genre => genre.id === genreId)[0].name;
+			const movies = moviesData.data.results.map((movie: Movie) => {
+				const genresName: string[] = movie.genre_ids.map((genreId: number) => {
+					return this.genres.filter(genre => genre.id === genreId)[0].name;
+				});
+
+				return {
+					image: API_CONFIG.imageBaseUrl + movie.poster_path,
+					title: movie.title,
+					year: movie.release_date,
+					genre: genresName,
+					movieId: movie.id,
+				};
 			});
 
-			return {
-				image: API_CONFIG.imageBaseUrl + movie.poster_path,
-				title: movie.title,
-				year: movie.release_date,
-				genre: genresName,
-				movieId: movie.id,
-			};
-		});
-
-		pagination.renderPages(
-			moviesData.data.total_pages,
-			action,
-			this.currentRequestType
-		);
-		this.renderer.renderMovie(movies);
-		// } catch (error) {}
+			pagination.renderPages(
+				moviesData.data.total_pages,
+				action,
+				this.currentRequestType
+			);
+			this.renderer.renderMovie(movies);
+		} catch (error) {}
 	}
 
 	public async getMovieById(movieId: number): Promise<void> {
@@ -108,14 +116,18 @@ class MoviesHandler {
 		} catch (error) {}
 	}
 
-	public async getGenres(): Promise<void> {
+	public async getGenres(
+		requestType: string,
+		page: number,
+		action: string
+	): Promise<void> {
 		try {
 			const url = `${API_CONFIG.apiUrl}/genre/movie/list?api_key=${API_CONFIG.apiKey}`;
 			const genresResponse = await this.movieService.getRequest(url);
 
 			this.genres = genresResponse.data.genres;
-
 			this.renderer.renderGenres(this.genres);
+			this.getMoviesOnCondition(requestType, page, action);
 		} catch (error) {}
 	}
 }

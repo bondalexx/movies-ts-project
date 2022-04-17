@@ -30,11 +30,7 @@ class Pagination {
 			this.currentPage = page;
 		}
 
-		this.movieHandler.getMoviesOnCondition(
-			currentRequestType,
-			this.currentPage,
-			action
-		);
+		this.movieHandler.getGenres(currentRequestType, this.currentPage, action);
 	}
 
 	public renderPages(

@@ -64,6 +64,8 @@ class Renderer {
 	}
 
 	public renderGenres(genres: Genre[]): void {
+		this.filterGenreBody.innerHTML = '';
+
 		genres.forEach((genre: Genre) => {
 			this.filterGenreBody.innerHTML += `<div class="body-filter-body">	
       <input type="checkbox" data-genre-id="${genre.id}" class="filtered-checkboxes" />
