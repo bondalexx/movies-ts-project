@@ -1,4 +1,3 @@
-import { paginationContainer } from '..';
 import MoviesHandler from './MoviesHandler';
 
 class Pagination {
@@ -6,8 +5,10 @@ class Pagination {
 	private paginationNumberArr: number[] = [];
 	private pageIndex = 0;
 	private _currentPage = 1;
-
 	private movieHandler: MoviesHandler = new MoviesHandler();
+	private paginationContainer: HTMLDivElement = document.querySelector(
+		'.pagination-container'
+	);
 
 	public get currentPage(): number {
 		return this._currentPage;
@@ -38,7 +39,7 @@ class Pagination {
 		action: string,
 		currentRequestType: string
 	): void {
-		paginationContainer.innerHTML = '';
+		this.paginationContainer.innerHTML = '';
 
 		for (let i = 1; i <= totalPages; i++) {
 			this.pages.push(i);
@@ -79,7 +80,7 @@ class Pagination {
 				this.currentPage === this.paginationNumberArr[i] ? 'active' : ''
 			}">${this.paginationNumberArr[i]}</button>`;
 
-			paginationContainer.innerHTML += markup;
+			this.paginationContainer.innerHTML += markup;
 		}
 
 		document.querySelectorAll('.pagination').forEach((p: HTMLButtonElement) => {

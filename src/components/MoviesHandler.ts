@@ -3,16 +3,7 @@ import { AxiosResponse } from 'axios';
 import { Movie } from '../models/movies.interface';
 import { API_CONFIG } from '../environment/api';
 import { Genre } from '../models/genres.interfarce';
-import {
-	detailsContainer,
-	filterGenreBody,
-	movieWrapper,
-	onChooseGenre,
-	onMovieClick,
-	pagination,
-	searchInput,
-	selectMoviesTypeContainer,
-} from '..';
+import { actionHandler, pagination } from '..';
 import { moviesType } from '..';
 import MovieService from './MovieService';
 import Renderer from './Renderer';
@@ -24,12 +15,11 @@ class MoviesHandler {
 	private _genres: Genre[] = [];
 	private movieService: MovieService = new MovieService();
 	private renderer: Renderer = new Renderer(
-		movieWrapper,
-		detailsContainer,
-		filterGenreBody,
-		selectMoviesTypeContainer,
-		onMovieClick,
-		onChooseGenre
+		actionHandler.onMovieClick,
+		actionHandler.onChooseGenre
+	);
+	private searchInput: HTMLInputElement = document.querySelector(
+		'.header-seacrh-input'
 	);
 
 	public get genresToSend(): number[] {
@@ -62,12 +52,12 @@ class MoviesHandler {
 
 		if (isRequestTypeIncluded) {
 			url = `${API_CONFIG.apiUrl}/movie/${requestType}?api_key=${API_CONFIG.apiKey}&page=${page}`;
-		} else if (requestType === 'search' && !searchInput.value) {
+		} else if (requestType === 'search' && !this.searchInput.value) {
 			url = `${API_CONFIG.apiUrl}/movie/top_rated?api_key=${API_CONFIG.apiKey}&page=${page}`;
 		} else if (requestType === 'genresFiltered') {
 			url = `${API_CONFIG.apiUrl}/discover/movie?api_key=${API_CONFIG.apiKey}&page=${page}&with_genres=${this.genresToSend}`;
 		} else {
-			url = `${API_CONFIG.apiUrl}/search/movie?api_key=${API_CONFIG.apiKey}&query=${searchInput.value}&page=${page}`;
+			url = `${API_CONFIG.apiUrl}/search/movie?api_key=${API_CONFIG.apiKey}&query=${this.searchInput.value}&page=${page}`;
 		}
 
 		try {

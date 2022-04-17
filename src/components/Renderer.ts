@@ -2,11 +2,18 @@ import { Genre } from '../models/genres.interfarce';
 import { Movie, MoviesType } from '../models/movies.interface';
 
 class Renderer {
+	private movieWrapper: HTMLDivElement = document.querySelector(
+		'.body-movie-content-wrapper'
+	);
+	private detailsContainer: HTMLDivElement =
+		document.querySelector('.details-container');
+	private filterGenreBody: HTMLDivElement =
+		document.querySelector('.filter-genre-body');
+	private selectMoviesTypeContainer: HTMLSelectElement = document.querySelector(
+		'.select-movie-rates'
+	);
+
 	constructor(
-		public movieWrapper: HTMLDivElement,
-		public detailsContainer: HTMLDivElement,
-		public filterGenreBody: HTMLDivElement,
-		public selectMoviesTypeContainer: HTMLSelectElement,
 		public onMovieClick: (event: PointerEvent) => void,
 		public onChooseGenre: (event: PointerEvent) => void
 	) {}
