@@ -3,28 +3,26 @@ import './styles.scss';
 import { MoviesType } from './models/movies.interface';
 import Renderer from './components/Renderer';
 import Pagination from './components/Pagination';
-import MovieService from './components/MovieService';
 import MoviesHandler from './components/MoviesHandler';
 
-const movieWrapper: HTMLDivElement = document.querySelector(
+export const movieWrapper: HTMLDivElement = document.querySelector(
 	'.body-movie-content-wrapper'
 );
-const paginationContainer: HTMLDivElement = document.querySelector(
+export const paginationContainer: HTMLDivElement = document.querySelector(
 	'.pagination-container'
 );
-const searchInput: HTMLInputElement = document.querySelector(
+export const searchInput: HTMLInputElement = document.querySelector(
 	'.header-seacrh-input'
 );
 const movieContentList: HTMLDivElement = document.querySelector(
 	'.movie-content-list'
 );
 const movieDetails: HTMLDivElement = document.querySelector('.movie-details');
-const detailsContainer: HTMLDivElement =
+export const detailsContainer: HTMLDivElement =
 	document.querySelector('.details-container');
-const selectMoviesTypeContainer: HTMLSelectElement = document.querySelector(
-	'.select-movie-rates'
-);
-const filterGenreBody: HTMLDivElement =
+export const selectMoviesTypeContainer: HTMLSelectElement =
+	document.querySelector('.select-movie-rates');
+export const filterGenreBody: HTMLDivElement =
 	document.querySelector('.filter-genre-body');
 const searchBtn: HTMLButtonElement = document.querySelector('.search-btn');
 const selectMoviesType: HTMLSelectElement = document.querySelector(
@@ -42,7 +40,7 @@ export const moviesType: MoviesType[] = [
 	{ value: 'upcoming', title: 'Upcoming' },
 ];
 
-const onMovieClick = (event: PointerEvent): void => {
+export const onMovieClick = (event: PointerEvent): void => {
 	movieContentList.style.display = 'none';
 	movieDetails.style.display = 'flex';
 
@@ -53,7 +51,7 @@ const onMovieClick = (event: PointerEvent): void => {
 	moviesHandler.getMovieById(movieId);
 };
 
-const onChooseGenre = (event: PointerEvent): void => {
+export const onChooseGenre = (event: PointerEvent): void => {
 	const genreId: number = parseInt(
 		(event.target as Element).getAttribute('data-genre-id')
 	);
@@ -107,13 +105,9 @@ const onApplyFilter = (): void => {
 	);
 };
 
-const moviesHandler = new MoviesHandler(searchInput);
-export const pagination = new Pagination(
-	paginationContainer,
-	moviesHandler.getMoviesOnCondition
-);
-export const movieService = new MovieService();
-export const renderer = new Renderer(
+const moviesHandler = new MoviesHandler();
+export const pagination = new Pagination();
+const renderer = new Renderer(
 	movieWrapper,
 	detailsContainer,
 	filterGenreBody,

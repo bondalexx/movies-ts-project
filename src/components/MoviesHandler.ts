@@ -2,19 +2,35 @@ import { AxiosResponse } from 'axios';
 
 import { Movie } from '../models/movies.interface';
 import { API_CONFIG } from '../environment/api';
-import { movieService } from '..';
 import { Genre } from '../models/genres.interfarce';
-import { pagination } from '..';
-import { renderer } from '..';
+import {
+	detailsContainer,
+	filterGenreBody,
+	movieWrapper,
+	onChooseGenre,
+	onMovieClick,
+	pagination,
+	searchInput,
+	selectMoviesTypeContainer,
+} from '..';
 import { moviesType } from '..';
+import MovieService from './MovieService';
+import Renderer from './Renderer';
 
 class MoviesHandler {
 	public _genresToSend: number[] = [];
 
 	private currentRequestType = 'top_rated';
 	private genres: Genre[] = [];
-
-	constructor(private searchInput: HTMLInputElement) {}
+	private movieService: MovieService = new MovieService();
+	private renderer: Renderer = new Renderer(
+		movieWrapper,
+		detailsContainer,
+		filterGenreBody,
+		selectMoviesTypeContainer,
+		onMovieClick,
+		onChooseGenre
+	);
 
 	public get genresToSend(): number[] {
 		return this._genresToSend;
@@ -38,16 +54,16 @@ class MoviesHandler {
 
 		if (isRequestTypeIncluded) {
 			url = `${API_CONFIG.apiUrl}/movie/${requestType}?api_key=${API_CONFIG.apiKey}&page=${page}`;
-		} else if (requestType === 'search' && !this.searchInput.value) {
+		} else if (requestType === 'search' && !searchInput.value) {
 			url = `${API_CONFIG.apiUrl}/movie/top_rated?api_key=${API_CONFIG.apiKey}&page=${page}`;
 		} else if (requestType === 'genresFiltered') {
 			url = `${API_CONFIG.apiUrl}/discover/movie?api_key=${API_CONFIG.apiKey}&page=${page}&with_genres=${this.genresToSend}`;
 		} else {
-			url = `${API_CONFIG.apiUrl}/search/movie?api_key=${API_CONFIG.apiKey}&query=${this.searchInput.value}&page=${page}`;
+			url = `${API_CONFIG.apiUrl}/search/movie?api_key=${API_CONFIG.apiKey}&query=${searchInput.value}&page=${page}`;
 		}
 
 		// try {
-		const moviesData: AxiosResponse = await movieService.getRequest(url);
+		const moviesData: AxiosResponse = await this.movieService.getRequest(url);
 
 		const movies = moviesData.data.results.map((movie: Movie) => {
 			const genresName: string[] = movie.genre_ids.map((genreId: number) => {
@@ -68,14 +84,14 @@ class MoviesHandler {
 			action,
 			this.currentRequestType
 		);
-		renderer.renderMovie(movies);
+		this.renderer.renderMovie(movies);
 		// } catch (error) {}
 	}
 
 	public async getMovieById(movieId: number): Promise<void> {
 		try {
 			const url = `${API_CONFIG.apiUrl}/movie/${movieId}?api_key=${API_CONFIG.apiKey}`;
-			const movieByIdData = await movieService.getRequest(url);
+			const movieByIdData = await this.movieService.getRequest(url);
 			const genresName: string[] = movieByIdData.data.genres.map(
 				(genre: Genre) => genre.name
 			);
@@ -88,18 +104,18 @@ class MoviesHandler {
 				vote_average: movieByIdData.data.vote_average,
 			};
 
-			renderer.renderDetailsPage(movieObjById);
+			this.renderer.renderDetailsPage(movieObjById);
 		} catch (error) {}
 	}
 
 	public async getGenres(): Promise<void> {
 		try {
 			const url = `${API_CONFIG.apiUrl}/genre/movie/list?api_key=${API_CONFIG.apiKey}`;
-			const genresResponse = await movieService.getRequest(url);
+			const genresResponse = await this.movieService.getRequest(url);
 
 			this.genres = genresResponse.data.genres;
 
-			renderer.renderGenres(this.genres);
+			this.renderer.renderGenres(this.genres);
 		} catch (error) {}
 	}
 }

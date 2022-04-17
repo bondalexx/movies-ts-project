@@ -1,17 +1,13 @@
+import { paginationContainer } from '..';
+import MoviesHandler from './MoviesHandler';
+
 class Pagination {
 	private pages: number[] = [];
 	private paginationNumberArr: number[] = [];
 	private pageIndex = 0;
 	private _currentPage = 1;
 
-	constructor(
-		public paginationContainer: HTMLDivElement,
-		public getMoviesOnCondition: (
-			requestType: string,
-			page: number,
-			action: string
-		) => Promise<void>
-	) {}
+	private movieHandler: MoviesHandler = new MoviesHandler();
 
 	public get currentPage(): number {
 		return this._currentPage;
@@ -34,7 +30,11 @@ class Pagination {
 			this.currentPage = page;
 		}
 
-		this.getMoviesOnCondition(currentRequestType, this.currentPage, action);
+		this.movieHandler.getMoviesOnCondition(
+			currentRequestType,
+			this.currentPage,
+			action
+		);
 	}
 
 	public renderPages(
@@ -42,7 +42,7 @@ class Pagination {
 		action: string,
 		currentRequestType: string
 	): void {
-		this.paginationContainer.innerHTML = '';
+		paginationContainer.innerHTML = '';
 
 		for (let i = 1; i <= totalPages; i++) {
 			this.pages.push(i);
@@ -83,7 +83,7 @@ class Pagination {
 				this.currentPage === this.paginationNumberArr[i] ? 'active' : ''
 			}">${this.paginationNumberArr[i]}</button>`;
 
-			this.paginationContainer.innerHTML += markup;
+			paginationContainer.innerHTML += markup;
 		}
 
 		document.querySelectorAll('.pagination').forEach((p: HTMLButtonElement) => {
