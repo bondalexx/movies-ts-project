@@ -1,4 +1,4 @@
-import { moviesHandler, pagination } from '..';
+import { moviesHandler, pagination } from './Main';
 
 class ActionHandler {
 	private movieContentList: HTMLDivElement = document.querySelector(

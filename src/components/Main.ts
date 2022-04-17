@@ -1,5 +1,16 @@
-import { actionHandler, moviesHandler, renderer } from '..';
 import { moviesType } from '../constants/movie.constants';
+import ActionHandler from './ActionHandler';
+import MoviesHandler from './MoviesHandler';
+import Pagination from './Pagination';
+import Renderer from './Renderer';
+
+export const actionHandler: ActionHandler = new ActionHandler();
+export const moviesHandler: MoviesHandler = new MoviesHandler();
+export const pagination: Pagination = new Pagination();
+export const renderer: Renderer = new Renderer(
+	actionHandler.onMovieClick,
+	actionHandler.onChooseGenre
+);
 
 class Main {
 	private searchBtn: HTMLButtonElement = document.querySelector('.search-btn');
