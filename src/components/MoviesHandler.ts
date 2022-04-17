@@ -4,9 +4,9 @@ import { Movie } from '../models/movies.interface';
 import { API_CONFIG } from '../environment/api';
 import { Genre } from '../models/genres.interfarce';
 import { actionHandler, pagination } from '..';
-import { moviesType } from '..';
 import MovieService from './MovieService';
 import Renderer from './Renderer';
+import { moviesType } from '../constants/movie.constants';
 
 class MoviesHandler {
 	public _genresToSend: number[] = [];
